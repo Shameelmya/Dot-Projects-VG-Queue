@@ -7,6 +7,7 @@ import { savePlaylist, loadPlaylist } from './lib/db';
 function App() {
   const [playlist, setPlaylist] = useState<PlaylistItem[]>([]);
   const [isPresenting, setIsPresenting] = useState(false);
+  const [startIndex, setStartIndex] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -33,13 +34,17 @@ function App() {
       {isPresenting ? (
         <PresentationView 
           playlist={playlist} 
+          startIndex={startIndex}
           onExit={() => setIsPresenting(false)} 
         />
       ) : (
         <ControlPanel 
           playlist={playlist} 
           setPlaylist={setPlaylist} 
-          onStart={() => setIsPresenting(true)}
+          onStart={(idx = 0) => {
+            setStartIndex(idx);
+            setIsPresenting(true);
+          }}
         />
       )}
     </div>

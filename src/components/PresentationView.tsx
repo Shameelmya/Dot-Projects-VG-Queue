@@ -3,12 +3,13 @@ import type { PlaylistItem } from '../types';
 
 interface Props {
   playlist: PlaylistItem[];
+  startIndex: number;
   onExit: () => void;
 }
 
-export const PresentationView: React.FC<Props> = ({ playlist, onExit }) => {
+export const PresentationView: React.FC<Props> = ({ playlist, startIndex, onExit }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [urls, setUrls] = useState<string[]>([]);
 
   // Initialize Object URLs

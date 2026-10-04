@@ -5,7 +5,7 @@ import type { PlaylistItem } from '../types';
 interface Props {
   playlist: PlaylistItem[];
   setPlaylist: React.Dispatch<React.SetStateAction<PlaylistItem[]>>;
-  onStart: () => void;
+  onStart: (startIndex?: number) => void;
 }
 
 export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }) => {
@@ -46,6 +46,12 @@ export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }
     setPlaylist(prev => prev.filter(item => item.id !== id));
   };
 
+  const clearAll = () => {
+    if (window.confirm('Are you sure you want to delete all items from the queue?')) {
+      setPlaylist([]);
+    }
+  };
+
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
 
@@ -76,7 +82,7 @@ export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }
         <h1>Dot Projects Queue</h1>
         <button 
           className="btn btn-primary" 
-          onClick={onStart}
+          onClick={() => onStart(0)}
           disabled={playlist.length === 0}
         >
           <Play size={20} />
@@ -104,7 +110,20 @@ export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }
       </div>
 
       <div className="playlist">
-        <h3 style={{ marginBottom: '16px' }}>Presentation Queue ({playlist.length})</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h3>Presentation Queue ({playlist.length})</h3>
+          {playlist.length > 0 && (
+            <button 
+              className="btn btn-icon btn-danger" 
+              style={{ padding: '6px 12px', fontSize: '0.85rem' }} 
+              onClick={clearAll}
+              title="Clear entire queue"
+            >
+              <Trash2 size={14} style={{ marginRight: '6px' }} />
+              Clear All
+            </button>
+          )}
+        </div>
         
         {playlist.length === 0 ? (
           <div className="empty-state">
@@ -155,6 +174,9 @@ export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }
                   value={item.duration}
                   onChange={(e) => updateDuration(item.id, parseInt(e.target.value) || 5)}
                 />
+                <button className="btn btn-icon btn-primary" onClick={() => onStart(index)} title="Play from here" style={{ padding: '8px 12px', borderRadius: '12px', background: 'var(--primary-accent)' }}>
+                  <Play size={18} />
+                </button>
                 <button className="btn btn-icon btn-danger" onClick={() => removeItem(item.id)} title="Remove">
                   <Trash2 size={18} />
                 </button>
