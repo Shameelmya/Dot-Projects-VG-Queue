@@ -1,16 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import type { PlaylistItem } from '../types';
+import { channel, SyncMessage } from '../lib/sync';
 
 interface Props {
   playlist: PlaylistItem[];
-  startIndex: number;
-  onExit: () => void;
+  currentIndex: number;
 }
 
-export const PresentationView: React.FC<Props> = ({ playlist, startIndex, onExit }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [currentIndex, setCurrentIndex] = useState(startIndex);
+export const PresentationView: React.FC<Props> = ({ playlist, currentIndex }) => {
   const [urls, setUrls] = useState<string[]>([]);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   // Initialize Object URLs
   useEffect(() => {
@@ -21,79 +20,6 @@ export const PresentationView: React.FC<Props> = ({ playlist, startIndex, onExit
       objectUrls.forEach(url => URL.revokeObjectURL(url));
     };
   }, [playlist]);
-
-  // Request Fullscreen
-  useEffect(() => {
-    const elem = containerRef.current;
-    if (elem) {
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen().catch(err => {
-          console.error(`Error attempting to enable fullscreen: ${err.message}`);
-        });
-      }
-    }
-
-    const handleFullscreenChange = () => {
-      if (!document.fullscreenElement) {
-        onExit(); // user pressed ESC
-      }
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, [onExit]);
-
-  const [isPaused, setIsPaused] = useState(false);
-  const returnIndexRef = useRef<number | null>(null);
-
-  // Keyboard controls
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') {
-        returnIndexRef.current = null;
-        setCurrentIndex((prev) => (prev + 1) % playlist.length);
-      } else if (e.key === 'ArrowLeft') {
-        returnIndexRef.current = null;
-        setCurrentIndex((prev) => (prev - 1 + playlist.length) % playlist.length);
-      } else if (e.key.toLowerCase() === 'p') {
-        setIsPaused(true);
-      } else if (e.key.toLowerCase() === 'c') {
-        setIsPaused(false);
-      } else if (e.key.toLowerCase() === 'h') {
-        const homeIndex = playlist.findIndex(item => item.isHome);
-        if (homeIndex !== -1 && homeIndex !== currentIndex) {
-          returnIndexRef.current = currentIndex;
-          setCurrentIndex(homeIndex);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playlist.length]);
-
-  // Handle the loop
-  useEffect(() => {
-    if (playlist.length === 0 || isPaused) return;
-
-    const currentItem = playlist[currentIndex];
-    
-    // Videos use their natural duration via the onEnded event instead of a timer
-    if (currentItem.type.startsWith('video/')) return;
-
-    const durationMs = currentItem.duration * 1000;
-
-    const timer = setTimeout(() => {
-      if (returnIndexRef.current !== null) {
-        setCurrentIndex(returnIndexRef.current);
-        returnIndexRef.current = null;
-      } else {
-        setCurrentIndex((prev) => (prev + 1) % playlist.length);
-      }
-    }, durationMs);
-
-    return () => clearTimeout(timer);
-  }, [currentIndex, playlist, isPaused]);
 
   // Hide cursor logic
   const [hideCursor, setHideCursor] = useState(false);
@@ -113,8 +39,6 @@ export const PresentationView: React.FC<Props> = ({ playlist, startIndex, onExit
       clearTimeout(timeout);
     };
   }, []);
-
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   // Play/pause videos programmatically based on active slide
   useEffect(() => {
@@ -139,10 +63,7 @@ export const PresentationView: React.FC<Props> = ({ playlist, startIndex, onExit
   }
 
   return (
-    <div 
-      ref={containerRef} 
-      className={`presenter-container ${hideCursor ? 'hide-cursor' : ''}`}
-    >
+    <div className={`presenter-container ${hideCursor ? 'hide-cursor' : ''}`}>
       <div className="screen-wrapper">
         {urls.map((url, idx) => (
           <div 
@@ -158,12 +79,7 @@ export const PresentationView: React.FC<Props> = ({ playlist, startIndex, onExit
                 playsInline
                 preload="auto"
                 onEnded={() => {
-                  if (returnIndexRef.current !== null) {
-                    setCurrentIndex(returnIndexRef.current);
-                    returnIndexRef.current = null;
-                  } else {
-                    setCurrentIndex((prev) => (prev + 1) % playlist.length);
-                  }
+                  channel.postMessage({ type: 'VIDEO_ENDED', index: idx } as SyncMessage);
                 }}
                 style={{ width: '100%', height: '100%', objectFit: 'contain', outline: 'none', pointerEvents: 'none' }}
               />

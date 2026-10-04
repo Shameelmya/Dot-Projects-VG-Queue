@@ -4,51 +4,17 @@ import { PresentationView } from './components/PresentationView';
 import type { PlaylistItem } from './types';
 import { savePlaylist, loadPlaylist } from './lib/db';
 
+import { ControllerApp } from './ControllerApp';
+import { PresenterApp } from './PresenterApp';
+
 function App() {
-  const [playlist, setPlaylist] = useState<PlaylistItem[]>([]);
-  const [isPresenting, setIsPresenting] = useState(false);
-  const [startIndex, setStartIndex] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const isPresenter = window.location.search.includes('mode=presenter');
 
-  useEffect(() => {
-    loadPlaylist().then(saved => {
-      if (saved && saved.length > 0) {
-        setPlaylist(saved);
-      }
-      setIsLoaded(true);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (isLoaded) {
-      savePlaylist(playlist);
-    }
-  }, [playlist, isLoaded]);
-
-  if (!isLoaded) {
-    return <div className="loading">Initializing...</div>;
+  if (isPresenter) {
+    return <PresenterApp />;
   }
 
-  return (
-    <div className="app-container">
-      {isPresenting ? (
-        <PresentationView 
-          playlist={playlist} 
-          startIndex={startIndex}
-          onExit={() => setIsPresenting(false)} 
-        />
-      ) : (
-        <ControlPanel 
-          playlist={playlist} 
-          setPlaylist={setPlaylist} 
-          onStart={(idx = 0) => {
-            setStartIndex(idx);
-            setIsPresenting(true);
-          }}
-        />
-      )}
-    </div>
-  );
+  return <ControllerApp />;
 }
 
 export default App;

@@ -6,9 +6,12 @@ interface Props {
   playlist: PlaylistItem[];
   setPlaylist: React.Dispatch<React.SetStateAction<PlaylistItem[]>>;
   onStart: (startIndex?: number) => void;
+  onClose?: () => void;
+  currentIndex?: number;
+  isPresenting?: boolean;
 }
 
-export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }) => {
+export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart, onClose, currentIndex, isPresenting }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -87,14 +90,21 @@ export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }
     <div className="control-panel">
       <div className="header">
         <h1>Dot Projects Queue</h1>
-        <button 
-          className="btn btn-primary" 
-          onClick={() => onStart(0)}
-          disabled={playlist.length === 0}
-        >
-          <Play size={20} />
-          Start Presentation
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {isPresenting && onClose && (
+            <button className="btn btn-danger" onClick={onClose}>
+              Stop Presentation
+            </button>
+          )}
+          <button 
+            className="btn btn-primary" 
+            onClick={() => onStart(0)}
+            disabled={playlist.length === 0}
+          >
+            <Play size={20} />
+            {isPresenting ? 'Restart Presentation' : 'Start Presentation'}
+          </button>
+        </div>
       </div>
 
       <div 
@@ -138,10 +148,13 @@ export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }
             <p>Your queue is empty. Add some media to get started.</p>
           </div>
         ) : (
-          playlist.map((item, index) => (
+          playlist.map((item, index) => {
+            const isActive = isPresenting && currentIndex === index;
+            return (
             <div 
               key={item.id} 
               className={`playlist-item ${draggedIdx === index ? 'dragging' : ''} ${dragOverIdx === index ? 'drag-over' : ''}`}
+              style={{ border: isActive ? '2px solid var(--primary-accent)' : 'none', background: isActive ? 'rgba(255,255,255,0.05)' : 'var(--glass-bg)' }}
               draggable
               onDragStart={() => handleDragStart(index)}
               onDragEnter={() => handleDragEnter(index)}
@@ -212,7 +225,7 @@ export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }
                 </button>
               </div>
             </div>
-          ))
+          )})
         )}
       </div>
     </div>
