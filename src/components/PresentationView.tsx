@@ -95,6 +95,22 @@ export const PresentationView: React.FC<Props> = ({ playlist, onExit }) => {
     };
   }, []);
 
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  // Play/pause videos programmatically based on active slide
+  useEffect(() => {
+    videoRefs.current.forEach((vid, i) => {
+      if (vid) {
+        if (i === currentIndex) {
+          vid.currentTime = 0; // start from beginning
+          vid.play().catch(e => console.error("Autoplay prevented:", e));
+        } else {
+          vid.pause();
+        }
+      }
+    });
+  }, [currentIndex]);
+
   if (playlist.length === 0 || urls.length !== playlist.length) {
     return (
       <div className="presenter-container" style={{ background: '#000' }}>
@@ -116,11 +132,14 @@ export const PresentationView: React.FC<Props> = ({ playlist, onExit }) => {
           >
             {playlist[idx].type.startsWith('video/') ? (
               <video 
+                ref={el => videoRefs.current[idx] = el}
                 src={url} 
                 autoPlay 
                 muted 
                 loop 
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                playsInline
+                preload="auto"
+                style={{ width: '100%', height: '100%', objectFit: 'contain', outline: 'none', pointerEvents: 'none' }}
               />
             ) : (
               <img src={url} alt={`Slide ${idx + 1}`} />
