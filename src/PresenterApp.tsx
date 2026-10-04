@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { PresentationView } from './components/PresentationView';
 import type { PlaylistItem } from './types';
 import { loadPlaylist } from './lib/db';
-import { channel, SyncMessage } from './lib/sync';
+import { channel, type SyncMessage } from './lib/sync';
 
 export function PresenterApp() {
   const [playlist, setPlaylist] = useState<PlaylistItem[]>([]);

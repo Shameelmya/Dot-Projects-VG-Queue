@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import type { PlaylistItem } from '../types';
-import { channel, SyncMessage } from '../lib/sync';
+import { channel, type SyncMessage } from '../lib/sync';
 
 interface Props {
   playlist: PlaylistItem[];

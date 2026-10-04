@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ControlPanel } from './components/ControlPanel';
 import type { PlaylistItem } from './types';
 import { savePlaylist, loadPlaylist } from './lib/db';
-import { channel, SyncMessage } from './lib/sync';
+import { channel, type SyncMessage } from './lib/sync';
 
 export function ControllerApp() {
   const [playlist, setPlaylist] = useState<PlaylistItem[]>([]);
