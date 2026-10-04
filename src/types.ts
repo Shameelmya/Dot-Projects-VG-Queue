@@ -4,4 +4,5 @@ export interface PlaylistItem {
   type: string;
   duration: number; // in seconds
   name: string;
+  isHome?: boolean;
 }

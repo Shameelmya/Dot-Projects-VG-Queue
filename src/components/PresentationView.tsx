@@ -44,18 +44,27 @@ export const PresentationView: React.FC<Props> = ({ playlist, startIndex, onExit
   }, [onExit]);
 
   const [isPaused, setIsPaused] = useState(false);
+  const returnIndexRef = useRef<number | null>(null);
 
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') {
+        returnIndexRef.current = null;
         setCurrentIndex((prev) => (prev + 1) % playlist.length);
       } else if (e.key === 'ArrowLeft') {
+        returnIndexRef.current = null;
         setCurrentIndex((prev) => (prev - 1 + playlist.length) % playlist.length);
       } else if (e.key.toLowerCase() === 'p') {
         setIsPaused(true);
       } else if (e.key.toLowerCase() === 'c') {
         setIsPaused(false);
+      } else if (e.key.toLowerCase() === 'h') {
+        const homeIndex = playlist.findIndex(item => item.isHome);
+        if (homeIndex !== -1 && homeIndex !== currentIndex) {
+          returnIndexRef.current = currentIndex;
+          setCurrentIndex(homeIndex);
+        }
       }
     };
 
@@ -68,10 +77,19 @@ export const PresentationView: React.FC<Props> = ({ playlist, startIndex, onExit
     if (playlist.length === 0 || isPaused) return;
 
     const currentItem = playlist[currentIndex];
+    
+    // Videos use their natural duration via the onEnded event instead of a timer
+    if (currentItem.type.startsWith('video/')) return;
+
     const durationMs = currentItem.duration * 1000;
 
     const timer = setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % playlist.length);
+      if (returnIndexRef.current !== null) {
+        setCurrentIndex(returnIndexRef.current);
+        returnIndexRef.current = null;
+      } else {
+        setCurrentIndex((prev) => (prev + 1) % playlist.length);
+      }
     }, durationMs);
 
     return () => clearTimeout(timer);
@@ -137,9 +155,16 @@ export const PresentationView: React.FC<Props> = ({ playlist, startIndex, onExit
                 src={url} 
                 autoPlay 
                 muted 
-                loop 
                 playsInline
                 preload="auto"
+                onEnded={() => {
+                  if (returnIndexRef.current !== null) {
+                    setCurrentIndex(returnIndexRef.current);
+                    returnIndexRef.current = null;
+                  } else {
+                    setCurrentIndex((prev) => (prev + 1) % playlist.length);
+                  }
+                }}
                 style={{ width: '100%', height: '100%', objectFit: 'contain', outline: 'none', pointerEvents: 'none' }}
               />
             ) : (

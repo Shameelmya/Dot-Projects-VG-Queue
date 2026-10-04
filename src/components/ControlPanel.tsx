@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { UploadCloud, Play, Trash2, GripVertical, Image as ImageIcon } from 'lucide-react';
+import { UploadCloud, Play, Trash2, GripVertical, Image as ImageIcon, Home } from 'lucide-react';
 import type { PlaylistItem } from '../types';
 
 interface Props {
@@ -44,6 +44,13 @@ export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }
 
   const removeItem = (id: string) => {
     setPlaylist(prev => prev.filter(item => item.id !== id));
+  };
+
+  const toggleHome = (id: string) => {
+    setPlaylist(prev => prev.map(item => ({
+      ...item,
+      isHome: item.id === id ? !item.isHome : false
+    })));
   };
 
   const clearAll = () => {
@@ -159,21 +166,44 @@ export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }
               )}
               
               <div className="item-info">
-                <div className="item-name">{item.name}</div>
+                <div className="item-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                  <span style={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>{item.name}</span>
+                  {item.isHome && <span style={{ fontSize: '0.7rem', background: 'var(--primary-accent)', color: '#fff', padding: '2px 6px', borderRadius: '8px', fontWeight: 'bold' }}>HOME</span>}
+                </div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                   #{index + 1}
                 </div>
               </div>
               
               <div className="item-controls">
-                <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Duration (s):</label>
-                <input 
-                  type="number" 
-                  min="1"
-                  className="duration-input" 
-                  value={item.duration}
-                  onChange={(e) => updateDuration(item.id, parseInt(e.target.value) || 5)}
-                />
+                {item.type.startsWith('video/') ? (
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginRight: '8px', width: '70px', textAlign: 'center' }}>Auto</span>
+                ) : (
+                  <>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Duration (s):</label>
+                    <input 
+                      type="number" 
+                      min="1"
+                      className="duration-input" 
+                      value={item.duration}
+                      onChange={(e) => updateDuration(item.id, parseInt(e.target.value) || 5)}
+                    />
+                  </>
+                )}
+                
+                <button 
+                  className="btn btn-icon" 
+                  onClick={() => toggleHome(item.id)} 
+                  title="Set as Home Slide" 
+                  style={{ 
+                    padding: '8px 12px', 
+                    borderRadius: '12px', 
+                    background: item.isHome ? 'var(--primary-accent)' : 'var(--bg-color)',
+                    border: '1px solid var(--glass-border)'
+                  }}
+                >
+                  <Home size={18} style={{ color: item.isHome ? '#fff' : 'var(--text-primary)' }} />
+                </button>
                 <button className="btn btn-icon btn-primary" onClick={() => onStart(index)} title="Play from here" style={{ padding: '8px 12px', borderRadius: '12px', background: 'var(--primary-accent)' }}>
                   <Play size={18} />
                 </button>
