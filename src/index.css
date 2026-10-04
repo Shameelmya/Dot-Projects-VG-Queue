@@ -1,29 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-color: #f2f2f7;
-  --surface-color: rgba(255, 255, 255, 0.7);
-  --primary-accent: #007aff;
-  --primary-accent-hover: #005bb5;
-  --text-primary: #1c1c1e;
-  --text-secondary: #8e8e93;
-  --danger: #ff3b30;
-  --glass-border: rgba(0, 0, 0, 0.1);
-  --item-bg: rgba(255, 255, 255, 0.6);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: #000000;
-    --surface-color: rgba(28, 28, 30, 0.65);
-    --primary-accent: #0a84ff;
-    --primary-accent-hover: #0060d1;
-    --text-primary: #f2f2f7;
-    --text-secondary: #aeaeb2;
-    --danger: #ff453a;
-    --glass-border: rgba(255, 255, 255, 0.15);
-    --item-bg: rgba(44, 44, 46, 0.6);
-  }
+  --bg-color: #000000;
+  --surface-color: rgba(28, 28, 30, 0.65);
+  --primary-accent: #0a84ff;
+  --primary-accent-hover: #0060d1;
+  --text-primary: #f2f2f7;
+  --text-secondary: #aeaeb2;
+  --danger: #ff453a;
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --item-bg: rgba(44, 44, 46, 0.6);
 }
 
 * {
