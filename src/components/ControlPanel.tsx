@@ -73,7 +73,7 @@ export const ControlPanel: React.FC<Props> = ({ playlist, setPlaylist, onStart }
   return (
     <div className="control-panel">
       <div className="header">
-        <h1>Limitless Presenter</h1>
+        <h1>Dot Projects Queue</h1>
         <button 
           className="btn btn-primary" 
           onClick={onStart}
