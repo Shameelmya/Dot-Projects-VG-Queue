@@ -132,7 +132,7 @@ export const PresentationView: React.FC<Props> = ({ playlist, onExit }) => {
           >
             {playlist[idx].type.startsWith('video/') ? (
               <video 
-                ref={el => videoRefs.current[idx] = el}
+                ref={el => { videoRefs.current[idx] = el; }}
                 src={url} 
                 autoPlay 
                 muted 

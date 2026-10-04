@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ControlPanel } from './components/ControlPanel';
 import { PresentationView } from './components/PresentationView';
 import type { PlaylistItem } from './types';
